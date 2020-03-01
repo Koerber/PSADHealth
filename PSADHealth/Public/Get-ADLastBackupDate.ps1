@@ -69,18 +69,9 @@ function Get-ADLastBackupDate {
             
             $global:CurrentFailure = $true
 
-            $mailParams = @{
-                To = $Configuration.MailTo
-                From = $Configuration.MailFrom
-                SmtpServer = $Configuration.SmtpServer
-                Subject = "AD Backup Check Alert! Backup is $Result days old"
-                Body = $emailOutput
-                BodyAsHtml = $true
-          }
-
-          Send-MailMessage @mailParams
-          #Write-Verbose "Sending Slack Alert"
-          #New-SlackPost "Alert - AD Last Backup is $Result days old"
+            Send-Mail -emailOutput $emailOutput -emailSubject "AD Backup Check Alert! Backup is $Result days old"
+            #Write-Verbose "Sending Slack Alert"
+            #New-SlackPost "Alert - AD Last Backup is $Result days old"
         }else {
             Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17052 -EntryType Information -message "SUCCESS - Last Active Directory backup occurred on $LastBackup! $Result days is less than the alert criteria of $MaxDaysSinceBackup day." -category "17052"
         }#end else
@@ -100,16 +91,9 @@ function Get-ADLastBackupDate {
                 Write-Verbose "Previous Errors Seen"
                 #Previous run had an alert
                 #No errors foun during this test so send email that the previous error(s) have cleared
-                $alertclearedParams = @{
-                    To = $Configuration.MailTo
-                    From = $Configuration.MailFrom
-                    SmtpServer = $Configuration.SmtpServer
-                    Subject = "AD Internal Time Sync - Alert Cleared!"
-                    Body = "The previous Internal AD Time Sync alert has now cleared."
-                    BodyAsHtml = $true
-              }
     
-              Send-MailMessage @alertclearedParams
+              Send-AlertCleared -emailOutput "The previous Internal AD Time Sync alert has now cleared." -emailSubject "AD Internal Time Sync"
+
               #Write-Verbose "Sending Slack Message - AD Backup Alert Cleared"
               #New-SlackPost "The previous alert, for AD Last Backup has cleared."
                 #Write-Output $InError

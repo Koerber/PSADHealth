@@ -83,7 +83,7 @@ function Test-ADObjectReplication {
             Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17010 -EntryType Error -message "FAILURE AD Object Replication - Failed to connect to PDCE - $SourceSystem  in site - $site" -category "17010"
             $Alert = "In $domainname Failed to connect to PDCE - $dc in site - $site.  Test stopping!  See the following support article $SupportArticle"
             $CurrentFailure = $true
-            Send-Mail $Alert
+            Send-Mail -emailOutput $Alert -emailSubject "ADObjectReplication"
             #Write-Verbose "Sending Slack Alert"
             #New-SlackPost "Alert - PDCE is Offline in $domainname, AD Object Replication test has exited."
             Exit
@@ -113,7 +113,7 @@ function Test-ADObjectReplication {
                     if ($i -eq 10){
                         $Alert = "In $domainname Failed to connect to DC - $dc in site - $site.  See the following support article $SupportArticle"
                         #If we get a failure on the 10th run, send an email for additional visibility, but not spam on every pass if a server or site is offline.
-                        Send-Mail $Alert
+                        Send-Mail -emailOutput $Alert -emailSubject "ADObjectReplication"
                         #Write-Verbose "Sending Slack Alert"
                         #New-SlackPost "Alert - In $domainname Failed to connect to DC - $dc in site - $site."
                     }
@@ -140,7 +140,7 @@ function Test-ADObjectReplication {
                     Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17010 -EntryType Error -message "FAILURE AD Object Replication failed to connect to DC - $dc in site - $site" -category "17010"
                     $Alert = "In $domainname Failed to connect to DC - $dc in site - $site.   See the following support article $SupportArticle"
                     $CurrentFailure = $true
-                    Send-Mail $Alert
+                    Send-Mail -emailOutput $Alert -emailSubject "ADObjectReplication"
                 }
             }
 
@@ -163,7 +163,7 @@ function Test-ADObjectReplication {
                 $RelevantEvents
                 "
                 $CurrentFailure = $true
-                Send-Mail $Alert
+                Send-Mail -emailOutput $Alert -emailSubject "ADObjectReplication"
                 #Write-Verbose "Sending Slack Alert"
                 #$New-SlackPost "Alert - In $domainname - the AD Object Replication Test cycle has run $i times without the object succesfully replicating to all DCs."                        
             } 
@@ -196,7 +196,7 @@ function Test-ADObjectReplication {
                 Write-Verbose "Previous Errors Seen"
                 #Previous run had an alert
                 #No errors foun during this test so send email that the previous error(s) have cleared
-                Send-AlertCleared
+                Send-AlertCleared -emailOutput "The previous alert, for AD Object Replication, has cleared" -emailSubject "ADObjectReplication"
                 #Write-Verbose "Sending Slack Message - Alert Cleared"
                 #New-SlackPost "The previous alert, for AD Object Replication, has cleared."
                 #Write-Output $InError

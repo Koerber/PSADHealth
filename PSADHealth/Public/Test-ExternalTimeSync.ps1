@@ -72,17 +72,7 @@ function Test-ADExternalTimeSync {
             Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17045 -EntryType Information -message "REPAIR External Time Sync Remediation was attempted `r`n " -category "17045"
             $CurrentFailure = $true
             
-            
-            $mailParams = @{
-                To = $Configuration.MailTo
-                From = $Configuration.MailFrom
-                SmtpServer = $Configuration.SmtpServer
-                Subject = $"AD External Time Sync Alert!"
-                Body = $emailOutput
-                BodyAsHtml = $true
-            }
-
-            Send-MailMessage @mailParams
+            Send-Mail -emailOutput $emailOutput -emailSubject "AD External Time Sync Alert!"
             #Write-Verbose "Sending Slack Alert"
             #New-SlackPost "Alert - External Time drift above max threashold - $emailOutput"
 
@@ -96,20 +86,7 @@ function Test-ADExternalTimeSync {
                 #Previous run had an alert
                 #No errors foun during this test so send email that the previous error(s) have cleared
                 
-                
-                
-                $alertParams = @{
-
-                    To = $Configuration.MailTo
-                    From = $Configuration.MailFrom
-                    SmtpServer = $Configuration.SmtpServer
-                    Subject = "AD External Time Sync - Alert Cleared!"
-                    Body = "The previous alert for AD External Time Sync has now cleared."
-                    BodyAsHtml = $true
-
-                }
-                
-                Send-MailMessage @alertParams
+                Send-AlertCleared -emailOutput "The previous alert for AD External Time Sync has now cleared." -emailSubject "AD External Time Sync"
                 #Write-Verbose "Sending Slack Message - Alert Cleared"
                 #New-SlackPost "The previous alert, for AD External Time Sync, has cleared."
             

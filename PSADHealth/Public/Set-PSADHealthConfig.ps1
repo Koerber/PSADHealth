@@ -72,7 +72,19 @@ function Set-PSADHealthConfig
 
         [Parameter()]
         [String]
-        $SlackToken
+        $SlackToken,
+
+        [Parameter()]
+        [switch]
+        $SMTPUseSsl,
+
+        [Parameter()]
+        [string]
+        $MailCredentialToken,
+
+        [Parameter()]
+        [int]
+        $SMTPPort
     )
 
     
@@ -111,6 +123,16 @@ function Set-PSADHealthConfig
         }
         'SlackToken' {
             $config.SlackToken = $SlackToken
+        }
+        # Additional params
+        'MailCredentialToken' {
+            $config.MailCredentialToken = $MailCredentialToken
+        }
+        'SMTPPort' {
+            $config.SMTPPort = $SMTPPort
+        }
+        'SMTPUseSsl' {
+            $config.SMTPUseSsl = $SMTPUseSsl
         }
 
     }

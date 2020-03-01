@@ -88,9 +88,9 @@ function Test-ADInternalTimeSync {
                 Invoke-Command -ComputerName $server -ScriptBlock { 'w32tm /resync' }
                 Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17035 -EntryType Information -message "REPAIR Internal Time Sync remediation was attempted `r`n " -category "17035"
                 CurrentFailure = $true
-                Send-Mail $emailOutput
-                Write-Verbose "Sending Slack Alert"
-                New-SlackPost "Alert - Internal Time drift above max threashold - $emailOutput"
+                Send-Mail -emailOutput $emailOutput -emailSubject "InternalTimeSync"
+                #Write-Verbose "Sending Slack Alert"
+                #New-SlackPost "Alert - Internal Time drift above max threashold - $emailOutput"
             }#end if
             If (!$CurrentFailure) {
                 Write-Verbose "No Issues found in this run"
@@ -100,9 +100,9 @@ function Test-ADInternalTimeSync {
                     Write-Verbose "Previous Errors Seen"
                     #Previous run had an alert
                     #No errors foun during this test so send email that the previous error(s) have cleared
-                    Send-AlertCleared
-                    Write-Verbose "Sending Slack Message - Alert Cleared"
-                    New-SlackPost "The previous alert, for AD Internal Time Sync, has cleared."
+                    Send-AlertCleared -emailOutput "The previous alert, for AD Internal Time Sync, has cleared" -emailSubject "ADInternalTimeSync"
+                    #Write-Verbose "Sending Slack Message - Alert Cleared"
+                    #New-SlackPost "The previous alert, for AD Internal Time Sync, has cleared."
                     #Write-Output $InError
                 }#End if
 

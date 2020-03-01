@@ -59,15 +59,7 @@ function Test-ADServices {
                             <br/>
                             THIS EMAIL WAS AUTO-GENERATED. PLEASE DO NOT REPLY TO THIS EMAIL.
 "@
-                $mailParams = @{
-                    To         = $Configuration.MailTo
-                    From       = $Configuration.MailFrom
-                    SmtpServer = $Configuration.SmtpServer
-                    Subject    = $Subject
-                    Body       = $EmailBody
-                    BodyAsHtml = $true
-                }
-                Send-MailMessage @mailParams
+                Send-Mail -emailOutput $EmailBody -emailSubject $Subject -BodyAsHtml
         }
     } #Process
 } #function

@@ -5,17 +5,7 @@ function Test-ADConfigMailer {
 
 
     process {
-
-        $mailParams = @{
-            To = $Configuration.MailTo
-            From = $Configuration.MailFrom
-            SmtpServer = $Configuration.SmtpServer
-            Subject = "Testing PSADHealth Mail Capability"
-            Body = "If you can read this, your scripts can alert via email!"
-            BodyAsHtml = $true
-        }
-
-        Send-MailMessage @mailParams
+        Send-Mail -emailOutput "If you can read this, your scripts can alert via email!" -emailSubject "Testing PSADHealth Mail Capability"
     }
     
 }

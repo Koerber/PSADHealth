@@ -3,50 +3,72 @@ function Send-Mail {
     Param(
         [Parameter(Mandatory,ValueFromPipeline)]
         [String]
-        $emailOutput
+        $emailOutput,
+
+        [string]
+        $emailSubject = "Notification PSADHealth",
+
+        [switch]
+        $BodyAsHtml
+
     )
     
     Write-Verbose "Sending Email"
-    Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17034 -EntryType Information -message "ALERT Email Sent" -category "17034"
+    Write-eventlog -LogName "Application" -Source "PSMonitor" -EventID 17034 -EntryType Information -message "ALERT Email Sent" -category "17034"
     Write-Verbose "Output is --  $emailOutput"
-    
-    #Mail Server Config
-    $NBN = (Get-ADDomain).NetBIOSName
-    $Domain = (Get-ADDomain).DNSRoot
   
+    # Get mail parameters
+    $configuration = Get-ADConfig
 
-    #Send to list:    
-    $emailCount = ($Configuration.MailTo).Count
+    $MailFrom = $configuration.MailFrom
+    $MailTo = $Configuration.MailTo -as [string[]]
+    $SmtpServer = $configuration.SMTPServer
+    $SmtpPort = $configuration.SMTPPort
 
-    If ($emailCount -gt 0){
-        $Emails = $Configuration.MailTo
-        foreach ($target in $Emails){
-        Write-Verbose "email will be sent to $target"
-        $msg.To.Add("$target")
+    # Load module for credentials if authentification is required
+    $useSsl = $configuration.SMTPUseSsl
+    if ($useSsl) {
+        try {
+            Import-Module CredentialManager
+        }
+        catch {
+            $errorMsg = "Unable to load module CredentialManager"
+            Write-Verbose -Message $errorMsg
+            Write-Error -Exception $_
+            Write-EventLog -LogName "Application" -Source "PSMonitor" -EventID 17060 -EntryType Error -Message $errorMsg -Category "17060"
+            $useSsl = $false
+        }
+    }
+
+    # Load credentials
+    if ($useSsl) {
+        try {
+            $c = (Get-StoredCredential -Target $configuration.MailCredentialToken).GetNetworkCredential()
+            $cobj = [pscredential]::new($c.UserName, $c.SecurePassword)
+        }
+        catch {
+            $errorMsg = "Unable to load credentails for SMTP - CredentialManager"
+            Write-Verbose -Message $errorMsg
+            Write-Error -Exception $_
+            Write-EventLog -LogName "Application" -Source "PSMonitor" -EventID 17061 -EntryType Error -Message $errorMsg -Category "17061"
+            $useSsl = $false
         }
     }
     
-    Else{
-        Write-Verbose "No email addresses defined"
-        Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17030 -EntryType Error -message "ALERT - No email addresses defined.  Alert email can't be sent!" -category "17030"
+    Write-Verbose -Message "Try to send mail (UseSsl: $useSsl)..."
+    try {
+        if ($useSsl) {
+            Send-MailMessage -Subject $emailSubject -Body $emailOutput -From $MailFrom -To $MailTo -SmtpServer $SmtpServer -Port $SmtpPort -UseSsl -Credential $cobj -BodyAsHtml:($BodyAsHtml)
+        }
+        else {
+            Send-MailMessage -Subject $emailSubject -Body $emailOutput -From $MailFrom -To $MailTo -SmtpServer $SmtpServer -Port $SmtpPort -BodyAsHtml:($BodyAsHtml)
+        }
+        Write-Verbose -Message "... success!"
     }
-    
-    #Message:
-    $mail = @{
-
-        To = $Configuration.MailTo
-        From = $Configuration.MailFrom
-        ReplyTo = $Configuration.MailFrom
-        SMTPServer = $Configuration.SMTPServer
-        Subject = "$NBN AD Internal Time Sync Alert!"
-        Body = @"
-        Time of Event: $((get-date))`r`n $emailOutput
-        See the following support article $SupportArticle
-"@
-        BodyAsHtml = $true
-
+    catch {
+        Write-Verbose -Message "... failure!"
+        Write-Error -Exception $_
+        Write-EventLog -LogName "Application" -Source "PSMonitor" -EventID 17062 -EntryType Error -Message "ALERT - email can't be sent!" -Category "17062"
     }
-
-    Send-MailMessage @mail
    
 }

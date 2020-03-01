@@ -60,7 +60,7 @@ function Test-ADReplication {
                 Write-Verbose "Failure - $OutputDetails"
                 Write-eventlog -logname "Application" -Source "PSMonitor" -EventID 17020 -EntryType Warning -message "FAILURE AD Replicaion on $server  -  $OutputDetails ." -category "17020"
                 $global:CurrentFailure = $true
-                Send-Mail $OutputDetails
+                Send-Mail -emailOutput $OutputDetails -emailSubject "ADReplication"
                 #Write-Verbose "Sending Slack Alert"
                 #New-SlackPost "Alert - FAILURE AD Replicaion on $server  -  $OutputDetails ."
             } #End if
@@ -77,7 +77,7 @@ function Test-ADReplication {
                 Write-Verbose "Previous Errors Seen"
                 #Previous run had an alert
                 #No errors foun during this test so send email that the previous error(s) have cleared
-                Send-AlertCleared
+                Send-AlertCleared -emailOutput "The previous alert, for AD Replication, has cleared" -emailSubject "ADReplication"
                 #Write-Verbose "Sending Slack Message - Alert Cleared"
                 #New-SlackPost "The previous alert, for AD Replication, has cleared."
                 #Write-Output $InError

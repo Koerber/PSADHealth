@@ -159,7 +159,8 @@ function Test-SysvolReplication {
                 $RelevantEvents
                 "
                 $CurrentFailure = $true
-                Send-Mail $Alert
+                
+                Send-Mail -emailOutput $Alert -emailSubject "SysvolReplication"
                 #Write-Verbose "Sending Slack Alert"
                 #New-SlackPost "Alert - Incomplete SYSVOL Replication Cycle in the domain: $domainname"
             }
@@ -192,7 +193,7 @@ function Test-SysvolReplication {
                 Write-Verbose "Previous Errors Seen"
                 #Previous run had an alert
                 #No errors foun during this test so send email that the previous error(s) have cleared
-                Send-AlertCleared
+                Send-AlertCleared -emailOutput "The previous alert, for AD SYSVOL Replication, has cleared" -emailSubject "SysvolReplication"
                 #Write-Verbose "Sending Slack Message - Alert Cleared"
                 #New-SlackPost "The previous alert, for AD SYSVOL Replication, has cleared."
                 #Write-Output $InError
