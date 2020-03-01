@@ -5,7 +5,7 @@ function Test-ADConfigMailer {
 
 
     process {
-        Send-Mail -emailOutput "If you can read this, your scripts can alert via email!" -emailSubject "Testing PSADHealth Mail Capability"
+        Send-Mail -emailOutput "If you can read this, your scripts can alert via email!" -emailSubject "Testing PSADHealth Mail Capability | $(Get-Date)" -Verbose
     }
     
 }

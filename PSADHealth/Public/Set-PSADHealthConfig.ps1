@@ -75,7 +75,7 @@ function Set-PSADHealthConfig
         $SlackToken,
 
         [Parameter()]
-        [switch]
+        [bool]
         $SMTPUseSsl,
 
         [Parameter()]
